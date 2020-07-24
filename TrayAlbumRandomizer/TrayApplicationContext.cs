@@ -13,7 +13,7 @@
     public class TrayApplicationContext : ApplicationContext
     {
         private readonly NotifyIcon _trayIcon;
-        private readonly SavableAlbum[] _albums;
+        private SavableAlbum[] _albums;
         private readonly IOpenInPlayerLogic _openInPlayerLogic;
         private readonly AlbumListUpdater _albumListUpdater;
         private readonly bool _openInBrowser = false;
@@ -61,6 +61,8 @@
 
         private void AlbumListUpdateFinished(object sender, AlbumListUpdateFinishedEventArgs e)
         {
+            _albums = e.Albums;
+
             MessageBox.Show("Done updating the albums in the user library.", "Update done", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 

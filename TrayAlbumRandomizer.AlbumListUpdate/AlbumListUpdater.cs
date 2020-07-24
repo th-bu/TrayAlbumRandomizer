@@ -73,11 +73,11 @@
             var albumsFromSpotify = await spotifyClient.PaginateAll(await spotifyClient.Library.GetAlbums().ConfigureAwait(false), paginator);
 
             var savableAlbums = albumsFromSpotify.Select(a =>
-                new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToList();
+                new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
             File.WriteAllText(_albumListFileName, JsonConvert.SerializeObject(savableAlbums));
 
-            RaiseAlbumListFinished();
+            RaiseAlbumListFinished(savableAlbums);
         }
 
         private async Task StartAuthentication()
@@ -114,9 +114,10 @@
             }
         }
 
-        private void RaiseAlbumListFinished()
+        private void RaiseAlbumListFinished(SavableAlbum[] albums)
         {
             var eventArgs = new AlbumListUpdateFinishedEventArgs();
+            eventArgs.Albums = albums;
 
             var eventHandler = AlbumListUpdateFinished;
             eventHandler?.Invoke(this, eventArgs);

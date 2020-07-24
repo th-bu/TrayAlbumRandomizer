@@ -4,5 +4,6 @@
 
     public class AlbumListUpdateFinishedEventArgs : EventArgs
     {
+        public SavableAlbum[] Albums { get; set; }
     }
 }
