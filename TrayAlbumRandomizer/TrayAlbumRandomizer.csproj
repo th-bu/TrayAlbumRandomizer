@@ -71,8 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlbumListReader.cs" />
-    <Compile Include="Interfaces\IAlbumListReader.cs" />
-    <Compile Include="Interfaces\IOpenInPlayerLogic.cs" />
+    <Compile Include="NextMode.cs" />
     <Compile Include="OpenInSpotifyLogic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

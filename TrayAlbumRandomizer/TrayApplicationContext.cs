@@ -4,7 +4,6 @@
     using System.Configuration;
     using System.Windows.Forms;
     using TrayAlbumRandomizer.AlbumListUpdate;
-    using TrayAlbumRandomizer.Interfaces;
     using TrayAlbumRandomizer.Properties;
 
     /// <see>
@@ -14,40 +13,52 @@
     {
         private readonly NotifyIcon _trayIcon;
         private SavableAlbum[] _albums;
-        private readonly IOpenInPlayerLogic _openInPlayerLogic;
+        private readonly OpenInSpotifyLogic _openInSpotifyLogic;
         private readonly bool _openInBrowser = false;
         private readonly string _browserPath = string.Empty;
         private readonly string _albumListFileName = "albums.json";
+        private readonly ContextMenu _contextMenu;
 
         public TrayApplicationContext()
         {
             // Initialize Tray Icon
+            _contextMenu = new ContextMenu(new MenuItem[] {
+                    new MenuItem("Open next album", OpenRandomAlbumClicked),
+                    new MenuItem("-"),
+                    new MenuItem("Random", OptionRandomClicked),
+                    new MenuItem("Shuffle", OptionShuffleClicked),
+                    new MenuItem("-"),
+                    new MenuItem("Update album list", UpdateAlbumListClicked),
+                    new MenuItem("-"),
+                    new MenuItem("Exit", Exit) });
+
             _trayIcon = new NotifyIcon()
             {
                 Icon = Resources.random_album_icon,
-                ContextMenu = new ContextMenu(new MenuItem[] {
-                    new MenuItem("Open random album", OpenRandomAlbumClicked),
-                    new MenuItem("Update album list", UpdateAlbumListClicked),
-                    new MenuItem("-"),
-                    new MenuItem("Exit", Exit) }),
+                ContextMenu = _contextMenu,
                 Visible = true
             };
 
+            _contextMenu.MenuItems[3].Checked = true;
+
             _trayIcon.DoubleClick += TrayIconDoubleClick;
 
-            _openInBrowser = Boolean.Parse(ConfigurationManager.AppSettings["OpenInBrowser"]);
+            _openInBrowser = bool.Parse(ConfigurationManager.AppSettings["OpenInBrowser"]);
             _browserPath = ConfigurationManager.AppSettings["BrowserPath"];
             _albumListFileName = ConfigurationManager.AppSettings["AlbumListFileName"] ?? _albumListFileName;
 
             var albumsReader = new AlbumListReader();
-            _albums = albumsReader.GetAlbums("albums.json");
+            _albums = albumsReader.GetAlbums(_albumListFileName);
 
-            _openInPlayerLogic = new OpenInSpotifyLogic(_albums);
+            _openInSpotifyLogic = new OpenInSpotifyLogic();
+            _openInSpotifyLogic.Albums = _albums;
+            _openInSpotifyLogic.NextMode = NextMode.Shuffle;
+            _openInSpotifyLogic.ShuffleAlbums();
         }
 
         private void OpenRandomAlbum()
         {
-            _openInPlayerLogic.Open(_openInBrowser, _browserPath);
+            _openInSpotifyLogic.Open(_openInBrowser, _browserPath);
         }
 
         private void UpdateAlbumList()
@@ -62,6 +73,7 @@
         private void AlbumListUpdateFinished(object sender, AlbumListUpdateFinishedEventArgs e)
         {
             _albums = e.Albums;
+            _openInSpotifyLogic.ShuffleAlbums();
 
             var albumListUpdater = sender as AlbumListUpdater;
 
@@ -94,6 +106,22 @@
         private void UpdateAlbumListClicked(object sender, EventArgs e)
         {
             UpdateAlbumList();
+        }
+
+        private void OptionRandomClicked(object sender, EventArgs e)
+        {
+            _openInSpotifyLogic.NextMode = NextMode.Random;
+            _contextMenu.MenuItems[2].Checked = true;
+            _contextMenu.MenuItems[3].Checked = false;
+        }
+
+        private void OptionShuffleClicked(object sender, EventArgs e)
+        {
+            _openInSpotifyLogic.NextMode = NextMode.Shuffle;
+            _contextMenu.MenuItems[2].Checked = false;
+            _contextMenu.MenuItems[3].Checked = true;
+
+            _openInSpotifyLogic.ShuffleAlbums();
         }
 
         private void Exit(object sender, EventArgs e)

@@ -3,9 +3,8 @@
     using Newtonsoft.Json;
     using System.IO;
     using TrayAlbumRandomizer.AlbumListUpdate;
-    using TrayAlbumRandomizer.Interfaces;
 
-    public class AlbumListReader : IAlbumListReader
+    public class AlbumListReader
     {
         public SavableAlbum[] GetAlbums(string albumsPath)
         {
