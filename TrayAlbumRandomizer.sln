@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayAlbumRandomizer.AlbumListUpdate", "TrayAlbumRandomizer.AlbumListUpdate\TrayAlbumRandomizer.AlbumListUpdate.csproj", "{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{7A49A0E5-CE49-42B8-BB66-39E74CFFE66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A49A0E5-CE49-42B8-BB66-39E74CFFE66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A49A0E5-CE49-42B8-BB66-39E74CFFE66E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

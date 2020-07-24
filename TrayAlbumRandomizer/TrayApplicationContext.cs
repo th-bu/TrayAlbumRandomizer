@@ -3,6 +3,7 @@
     using System;
     using System.Configuration;
     using System.Windows.Forms;
+    using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Interfaces;
     using TrayAlbumRandomizer.Pocos;
     using TrayAlbumRandomizer.Properties;
@@ -17,7 +18,7 @@
         private readonly IOpenInPlayerLogic _openInPlayerLogic;
         private readonly bool _openInBrowser = false;
         private readonly string _browserPath = string.Empty;
-        private readonly string _albumListFileName = "albums.xml";
+        private readonly string _albumListFileName = "albums.json";
 
         public TrayApplicationContext()
         {
@@ -27,6 +28,7 @@
                 Icon = Resources.random_album_icon,
                 ContextMenu = new ContextMenu(new MenuItem[] {
                     new MenuItem("Open random album", OpenRandomAlbumClicked),
+                    new MenuItem("Update album list", UpdateAlbumListClicked),
                     new MenuItem("-"),
                     new MenuItem("Exit", Exit) }),
                 Visible = true
@@ -49,6 +51,21 @@
             _openInPlayerLogic.Open(_openInBrowser, _browserPath);
         }
 
+        private void UpdateAlbumList()
+        {
+            try
+            {
+                AlbumListUpdater updater = new AlbumListUpdater(_albumListFileName);
+                updater.UpdateAlbumList().Wait();
+
+                MessageBox.Show("Done fetching the albums in the user library.", "Fetching done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error during update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void TrayIconDoubleClick(object sender, EventArgs e)
         {
             OpenRandomAlbum();
@@ -57,6 +74,11 @@
         private void OpenRandomAlbumClicked(object sender, EventArgs e)
         {
             OpenRandomAlbum();
+        }
+
+        private void UpdateAlbumListClicked(object sender, EventArgs e)
+        {
+            UpdateAlbumList();
         }
 
         private void Exit(object sender, EventArgs e)
