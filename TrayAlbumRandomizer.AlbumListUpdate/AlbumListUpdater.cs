@@ -19,6 +19,9 @@
         private readonly string _albumListFileName;
         private readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
 
+        public event EventHandler<AlbumListUpdateFinishedEventArgs> AlbumListUpdateFinished;
+        public event EventHandler<UpdateErrorEventArgs> UpdateError;
+
         public AlbumListUpdater(string albumListFileName)
         {
             _clientId = ConfigurationManager.AppSettings["SpotfiyClientId"];
@@ -38,17 +41,24 @@
 
         public async Task UpdateAlbumList()
         {
-            if (File.Exists(CredentialsFileName))
+            try
             {
-                await Start();
+                if (File.Exists(CredentialsFileName))
+                {
+                    await StartUpdate();
+                }
+                else
+                {
+                    await StartAuthentication();
+                }
             }
-            else
+            catch(Exception exception)
             {
-                await StartAuthentication();
+                RaiseUpdateError(exception.Message);
             }
         }
 
-        private async Task Start()
+        private async Task StartUpdate()
         {
             var credentialsJson = File.ReadAllText(CredentialsFileName);
             var tokenResponse = JsonConvert.DeserializeObject<AuthorizationCodeTokenResponse>(credentialsJson);
@@ -66,6 +76,8 @@
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToList();
 
             File.WriteAllText(_albumListFileName, JsonConvert.SerializeObject(savableAlbums));
+
+            RaiseAlbumListFinished();
         }
 
         private async Task StartAuthentication()
@@ -84,15 +96,39 @@
 
         private async Task OnAuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
         {
-            await _server.Stop();
-            AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
-              new AuthorizationCodeTokenRequest(_clientId, _clientSecret, response.Code, _server.BaseUri)
-            );
+            try
+            {
+                await _server.Stop();
+                AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
+                  new AuthorizationCodeTokenRequest(_clientId, _clientSecret, response.Code, _server.BaseUri)
+                );
 
-            File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
-            _server.Dispose();
+                File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
+                _server.Dispose();
 
-            await Start();
+                await StartUpdate();
+            }
+            catch(Exception exception)
+            {
+                RaiseUpdateError(exception.Message);
+            }
+        }
+
+        private void RaiseAlbumListFinished()
+        {
+            var eventArgs = new AlbumListUpdateFinishedEventArgs();
+
+            var eventHandler = AlbumListUpdateFinished;
+            eventHandler?.Invoke(this, eventArgs);
+        }
+
+        private void RaiseUpdateError(string errorMessage)
+        {
+            var eventArgs = new UpdateErrorEventArgs();
+            eventArgs.ErrorMessage = errorMessage;
+
+            var eventHandler = UpdateError;
+            eventHandler?.Invoke(this, eventArgs);
         }
     }
 }

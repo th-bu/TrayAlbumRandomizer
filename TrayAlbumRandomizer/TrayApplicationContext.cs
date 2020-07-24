@@ -15,6 +15,7 @@
         private readonly NotifyIcon _trayIcon;
         private readonly SavableAlbum[] _albums;
         private readonly IOpenInPlayerLogic _openInPlayerLogic;
+        private readonly AlbumListUpdater _albumListUpdater;
         private readonly bool _openInBrowser = false;
         private readonly string _browserPath = string.Empty;
         private readonly string _albumListFileName = "albums.json";
@@ -43,6 +44,9 @@
             _albums = albumsReader.GetAlbums("albums.json");
 
             _openInPlayerLogic = new OpenInSpotifyLogic(_albums);
+            _albumListUpdater = new AlbumListUpdater(_albumListFileName);
+            _albumListUpdater.AlbumListUpdateFinished += AlbumListUpdateFinished;
+            _albumListUpdater.UpdateError += UpdateError;
         }
 
         private void OpenRandomAlbum()
@@ -52,17 +56,17 @@
 
         private void UpdateAlbumList()
         {
-            try
-            {
-                AlbumListUpdater updater = new AlbumListUpdater(_albumListFileName);
-                updater.UpdateAlbumList().Wait();
+            _albumListUpdater.UpdateAlbumList().Wait();
+        }
 
-                MessageBox.Show("Done fetching the albums in the user library.", "Fetching done", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch(Exception exception)
-            {
-                MessageBox.Show(exception.Message, "Error during update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+        private void AlbumListUpdateFinished(object sender, AlbumListUpdateFinishedEventArgs e)
+        {
+            MessageBox.Show("Done updating the albums in the user library.", "Update done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void UpdateError(object sender, UpdateErrorEventArgs e)
+        {
+            MessageBox.Show(e.ErrorMessage, "Error during update", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void TrayIconDoubleClick(object sender, EventArgs e)
