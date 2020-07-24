@@ -18,7 +18,6 @@
         private readonly bool _openInBrowser = false;
         private readonly string _browserPath = string.Empty;
 
-
         public TrayApplicationContext()
         {
             // Initialize Tray Icon

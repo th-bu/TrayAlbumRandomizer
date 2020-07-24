@@ -1,7 +1,7 @@
 ﻿namespace TrayAlbumRandomizer
 {
-    using Newtonsoft.Json;
     using System.IO;
+    using System.Xml.Serialization;
     using TrayAlbumRandomizer.Interfaces;
     using TrayAlbumRandomizer.Pocos;
 
@@ -9,8 +9,12 @@
     {
         public SavableAlbum[] GetAlbums(string albumsPath)
         {
-            var json = File.ReadAllText(albumsPath);
-            return JsonConvert.DeserializeObject<SavableAlbum[]>(json);
+            var serializer = new XmlSerializer(typeof(SavableAlbum[]));
+
+            using (FileStream fileStream = new FileStream(albumsPath, FileMode.Open))
+            {
+                return (SavableAlbum[])serializer.Deserialize(fileStream);
+            }
         }
     }
 }
