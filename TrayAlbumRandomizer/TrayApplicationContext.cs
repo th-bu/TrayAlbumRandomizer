@@ -17,6 +17,7 @@
         private readonly IOpenInPlayerLogic _openInPlayerLogic;
         private readonly bool _openInBrowser = false;
         private readonly string _browserPath = string.Empty;
+        private readonly string _albumListFileName = "albums.xml";
 
         public TrayApplicationContext()
         {
@@ -35,6 +36,7 @@
 
             _openInBrowser = Boolean.Parse(ConfigurationManager.AppSettings["OpenInBrowser"]);
             _browserPath = ConfigurationManager.AppSettings["BrowserPath"];
+            _albumListFileName = ConfigurationManager.AppSettings["AlbumListFileName"] ?? _albumListFileName;
 
             var albumsReader = new AlbumListReader();
             _albums = albumsReader.GetAlbums("albums.json");
