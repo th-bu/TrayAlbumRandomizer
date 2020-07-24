@@ -9,7 +9,6 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using TrayAlbumRandomizer.Pocos;
     using static SpotifyAPI.Web.Scopes;
 
     public class AlbumListUpdater

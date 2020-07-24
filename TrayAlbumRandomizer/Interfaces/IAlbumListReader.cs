@@ -1,6 +1,6 @@
 ﻿namespace TrayAlbumRandomizer.Interfaces
 {
-    using TrayAlbumRandomizer.Pocos;
+    using TrayAlbumRandomizer.AlbumListUpdate;
 
     public interface IAlbumListReader
     {

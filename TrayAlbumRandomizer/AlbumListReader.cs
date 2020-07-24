@@ -2,8 +2,8 @@
 {
     using Newtonsoft.Json;
     using System.IO;
+    using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Interfaces;
-    using TrayAlbumRandomizer.Pocos;
 
     public class AlbumListReader : IAlbumListReader
     {

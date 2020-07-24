@@ -112,10 +112,6 @@
       <Project>{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}</Project>
       <Name>TrayAlbumRandomizer.AlbumListUpdate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TrayAlbumRandomizer.Pocos\TrayAlbumRandomizer.Pocos.csproj">
-      <Project>{EB8D96B7-0E93-4D87-BA13-128EA2A8D6E8}</Project>
-      <Name>TrayAlbumRandomizer.Pocos</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

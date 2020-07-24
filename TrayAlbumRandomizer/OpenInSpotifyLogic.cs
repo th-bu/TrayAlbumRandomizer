@@ -2,8 +2,8 @@
 {
     using System;
     using System.Diagnostics;
+    using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Interfaces;
-    using TrayAlbumRandomizer.Pocos;
 
     public class OpenInSpotifyLogic : IOpenInPlayerLogic
     {

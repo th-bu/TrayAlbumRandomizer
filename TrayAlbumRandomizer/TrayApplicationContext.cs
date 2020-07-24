@@ -5,7 +5,6 @@
     using System.Windows.Forms;
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Interfaces;
-    using TrayAlbumRandomizer.Pocos;
     using TrayAlbumRandomizer.Properties;
 
     /// <see>
