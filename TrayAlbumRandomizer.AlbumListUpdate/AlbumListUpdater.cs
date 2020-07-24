@@ -99,6 +99,8 @@
             try
             {
                 await _server.Stop();
+                _server.AuthorizationCodeReceived -= OnAuthorizationCodeReceived;
+
                 AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
                   new AuthorizationCodeTokenRequest(_clientId, _clientSecret, response.Code, _server.BaseUri)
                 );
