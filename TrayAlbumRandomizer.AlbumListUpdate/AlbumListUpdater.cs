@@ -24,16 +24,16 @@
 
         public AlbumListUpdater(string albumListFileName)
         {
-            _clientId = ConfigurationManager.AppSettings["SpotfiyClientId"];
+            _clientId = ConfigurationManager.AppSettings["SpotifyClientId"];
             if (string.IsNullOrWhiteSpace(_clientId))
             {
-                _clientId = Environment.GetEnvironmentVariable("SpotfiyClientId");
+                _clientId = Environment.GetEnvironmentVariable("SpotifyClientId");
             }
 
-            _clientSecret = ConfigurationManager.AppSettings["SpotfiyClientSecret"];
+            _clientSecret = ConfigurationManager.AppSettings["SpotifyClientSecret"];
             if (string.IsNullOrWhiteSpace(_clientSecret))
             {
-                _clientSecret = Environment.GetEnvironmentVariable("SpotfiyClientSecret");
+                _clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
             }
 
             _albumListFileName = albumListFileName;
@@ -66,8 +66,7 @@
             var authenticator = new AuthorizationCodeAuthenticator(_clientId, _clientSecret, tokenResponse);
             authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(token));
 
-            var clientConfig = SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator);
-            var spotifyClient = new SpotifyClient(clientConfig);
+            var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
             var paginator = new SimplePaginatorWithDelay(500);
 
             var albumsFromSpotify = await spotifyClient.PaginateAll(await spotifyClient.Library.GetAlbums().ConfigureAwait(false), paginator);
@@ -76,6 +75,8 @@
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
             File.WriteAllText(_albumListFileName, JsonConvert.SerializeObject(savableAlbums));
+
+            _server.Dispose();
 
             RaiseAlbumListFinished(savableAlbums);
         }
@@ -90,8 +91,7 @@
                 Scope = new List<string> { UserLibraryRead }
             };
 
-            Uri authorizationUri = loginRequest.ToUri();
-            BrowserUtil.Open(authorizationUri);
+            BrowserUtil.Open(loginRequest.ToUri());
         }
 
         private async Task OnAuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
@@ -106,7 +106,6 @@
                 );
 
                 File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
-                _server.Dispose();
 
                 await StartUpdate();
             }
