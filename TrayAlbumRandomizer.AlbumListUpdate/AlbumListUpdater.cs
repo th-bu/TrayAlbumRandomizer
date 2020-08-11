@@ -9,32 +9,33 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using TrayAlbumRandomizer.Authorization;
     using static SpotifyAPI.Web.Scopes;
 
-    public class AlbumListUpdater
+    public class AlbumListUpdater : IDisposable
     {
         private const string CredentialsFileName = "credentials.json";
-        private readonly string _clientId;
-        private readonly string _clientSecret;
         private readonly string _albumListFileName;
-        private readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
+        private readonly SpotifyAuthorization _spotifyAuthorization;
 
         public event EventHandler<AlbumListUpdateFinishedEventArgs> AlbumListUpdateFinished;
         public event EventHandler<UpdateErrorEventArgs> UpdateError;
 
         public AlbumListUpdater(string albumListFileName)
         {
-            _clientId = ConfigurationManager.AppSettings["SpotifyClientId"];
-            if (string.IsNullOrWhiteSpace(_clientId))
+            string clientId = ConfigurationManager.AppSettings["SpotifyClientId"];
+            if (string.IsNullOrWhiteSpace(clientId))
             {
-                _clientId = Environment.GetEnvironmentVariable("SpotifyClientId");
+                clientId = Environment.GetEnvironmentVariable("SpotifyClientId");
             }
 
-            _clientSecret = ConfigurationManager.AppSettings["SpotifyClientSecret"];
-            if (string.IsNullOrWhiteSpace(_clientSecret))
+            string clientSecret = ConfigurationManager.AppSettings["SpotifyClientSecret"];
+            if (string.IsNullOrWhiteSpace(clientSecret))
             {
-                _clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
+                clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
             }
+
+            _spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
 
             _albumListFileName = albumListFileName;
         }
@@ -49,7 +50,7 @@
                 }
                 else
                 {
-                    await StartAuthentication();
+                    await _spotifyAuthorization.StartAuthorization(async () => await StartUpdate());
                 }
             }
             catch(Exception exception)
@@ -60,12 +61,7 @@
 
         private async Task StartUpdate()
         {
-            var credentialsJson = File.ReadAllText(CredentialsFileName);
-            var tokenResponse = JsonConvert.DeserializeObject<AuthorizationCodeTokenResponse>(credentialsJson);
-
-            var authenticator = new AuthorizationCodeAuthenticator(_clientId, _clientSecret, tokenResponse);
-            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(token));
-
+            var authenticator = _spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
             var paginator = new SimplePaginatorWithDelay(500);
 
@@ -76,43 +72,7 @@
 
             File.WriteAllText(_albumListFileName, JsonConvert.SerializeObject(savableAlbums));
 
-            _server.Dispose();
-
             RaiseAlbumListFinished(savableAlbums);
-        }
-
-        private async Task StartAuthentication()
-        {
-            await _server.Start();
-            _server.AuthorizationCodeReceived += OnAuthorizationCodeReceived;
-
-            var loginRequest = new LoginRequest(_server.BaseUri, _clientId, LoginRequest.ResponseType.Code)
-            {
-                Scope = new List<string> { UserLibraryRead }
-            };
-
-            BrowserUtil.Open(loginRequest.ToUri());
-        }
-
-        private async Task OnAuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
-        {
-            try
-            {
-                await _server.Stop();
-                _server.AuthorizationCodeReceived -= OnAuthorizationCodeReceived;
-
-                AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
-                  new AuthorizationCodeTokenRequest(_clientId, _clientSecret, response.Code, _server.BaseUri)
-                );
-
-                File.WriteAllText(CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
-
-                await StartUpdate();
-            }
-            catch(Exception exception)
-            {
-                RaiseUpdateError(exception.Message);
-            }
         }
 
         private void RaiseAlbumListFinished(SavableAlbum[] albums)
@@ -131,6 +91,11 @@
 
             var eventHandler = UpdateError;
             eventHandler?.Invoke(this, eventArgs);
+        }
+
+        public void Dispose()
+        {
+            _spotifyAuthorization.Dispose();
         }
     }
 }

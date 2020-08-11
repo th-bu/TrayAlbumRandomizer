@@ -63,11 +63,13 @@
 
         private void UpdateAlbumList()
         {
-            var albumListUpdater = new AlbumListUpdater(_albumListFileName);
-            albumListUpdater.AlbumListUpdateFinished += AlbumListUpdateFinished;
-            albumListUpdater.UpdateError += UpdateError;
+            using (var albumListUpdater = new AlbumListUpdater(_albumListFileName))
+            {
+                albumListUpdater.AlbumListUpdateFinished += AlbumListUpdateFinished;
+                albumListUpdater.UpdateError += UpdateError;
 
-            albumListUpdater.UpdateAlbumList().Wait();
+                albumListUpdater.UpdateAlbumList().Wait();
+            }
         }
 
         private void AlbumListUpdateFinished(object sender, AlbumListUpdateFinishedEventArgs e)
