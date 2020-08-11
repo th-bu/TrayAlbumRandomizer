@@ -5,6 +5,7 @@
     using System.Windows.Forms;
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Properties;
+    using TrayAlbumRandomizer.Windows;
 
     /// <see>
     /// https://stackoverflow.com/a/10250051/869120
@@ -63,36 +64,23 @@
 
         private void UpdateAlbumList()
         {
-            using (var albumListUpdater = new AlbumListUpdater(_albumListFileName))
-            {
-                albumListUpdater.AlbumListUpdateFinished += AlbumListUpdateFinished;
-                albumListUpdater.UpdateError += UpdateError;
+            OpenCliForm openCliForm = new OpenCliForm("Update album list");
 
-                albumListUpdater.UpdateAlbumList().Wait();
-            }
+            openCliForm.Show();
+            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.AlbumListUpdater.exe", _albumListFileName);
+
+            openCliForm.FormClosed += OpenCliFormFormClosed;
         }
 
-        private void AlbumListUpdateFinished(object sender, AlbumListUpdateFinishedEventArgs e)
+        private void OpenCliFormFormClosed(object sender, FormClosedEventArgs e)
         {
-            _albums = e.Albums;
+            var albumsReader = new AlbumListReader();
+            _albums = albumsReader.GetAlbums(_albumListFileName);
+
             _openInSpotifyLogic.ShuffleAlbums();
 
-            var albumListUpdater = sender as AlbumListUpdater;
-
-            albumListUpdater.AlbumListUpdateFinished -= AlbumListUpdateFinished;
-            albumListUpdater.UpdateError -= UpdateError;
-
-            MessageBox.Show("Done updating the albums in the user library.", "Update done", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void UpdateError(object sender, UpdateErrorEventArgs e)
-        {
-            var albumListUpdater = sender as AlbumListUpdater;
-
-            albumListUpdater.AlbumListUpdateFinished -= AlbumListUpdateFinished;
-            albumListUpdater.UpdateError -= UpdateError;
-
-            MessageBox.Show(e.ErrorMessage, "Error during update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            var openCliForm = sender as OpenCliForm;
+            openCliForm.FormClosed -= OpenCliFormFormClosed;
         }
 
         private void TrayIconDoubleClick(object sender, EventArgs e)
