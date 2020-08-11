@@ -6,6 +6,7 @@
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using TrayAlbumRandomizer.Authorization;
 
@@ -44,7 +45,14 @@
                 }
                 else
                 {
-                    await _spotifyAuthorization.StartAuthorization(async () => await StartUpdate());
+                    await _spotifyAuthorization.StartAuthorization();
+                    while (!_spotifyAuthorization.IsAuthorizationFinished)
+                    {
+                        // Todo: Exit condition in case the authorization is not successful
+                        Thread.Sleep(1000);
+                    }
+
+                    await StartUpdate();
                 }
             }
             catch (Exception exception)

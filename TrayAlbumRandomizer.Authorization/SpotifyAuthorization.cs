@@ -15,7 +15,6 @@
         private readonly string _clientSecret;
         private readonly string _credentialsFileName;
         private readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
-        private Action _runAfterSuccessfulAuthorization;
 
         public SpotifyAuthorization(string clientId, string clientSecret, string credentialsFileName)
         {
@@ -23,6 +22,8 @@
             _clientSecret = clientSecret;
             _credentialsFileName = credentialsFileName;
         }
+
+        public bool IsAuthorizationFinished { get; set; } = false;
 
         public void Dispose()
         {
@@ -40,10 +41,8 @@
             return authenticator;
         }
 
-        public async Task StartAuthorization(Action doAfterSuccessfulAuthorization)
+        public async Task StartAuthorization()
         {
-            _runAfterSuccessfulAuthorization = doAfterSuccessfulAuthorization;
-
             await _server.Start();
             _server.AuthorizationCodeReceived += OnAuthorizationCodeReceived;
 
@@ -66,7 +65,7 @@
 
             File.WriteAllText(_credentialsFileName, JsonConvert.SerializeObject(tokenResponse));
 
-            _runAfterSuccessfulAuthorization();
+            IsAuthorizationFinished = true;
         }
     }
 }
