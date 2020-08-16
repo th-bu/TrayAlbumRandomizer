@@ -9,11 +9,11 @@
 
     public class SimplePaginatorWithDelay : IPaginator
     {
-        private readonly int _delay = 0;
+        private readonly int delay = 0;
 
         public SimplePaginatorWithDelay(int delay)
         {
-            _delay = delay;
+            this.delay = delay;
         }
 
         protected virtual Task<bool> ShouldContinue<T>(List<T> results, IPaginatable<T> page)
@@ -32,11 +32,11 @@
             var results = new List<T>();
             results.AddRange(firstPage.Items);
 
-            while (page.Next != null && await ShouldContinue(results, page).ConfigureAwait(false))
+            while (page.Next != null && await this.ShouldContinue(results, page).ConfigureAwait(false))
             {
                 page = await connector.Get<Paging<T>>(new Uri(page.Next, UriKind.Absolute)).ConfigureAwait(false);
                 results.AddRange(page.Items);
-                Thread.Sleep(_delay);
+                Thread.Sleep(this.delay);
             }
 
             return results;
@@ -50,12 +50,12 @@
             var results = new List<T>();
             results.AddRange(firstPage.Items);
 
-            while (page.Next != null && await ShouldContinue(results, page).ConfigureAwait(false))
+            while (page.Next != null && await this.ShouldContinue(results, page).ConfigureAwait(false))
             {
                 var next = await connector.Get<TNext>(new Uri(page.Next, UriKind.Absolute)).ConfigureAwait(false);
                 page = mapper(next);
                 results.AddRange(page.Items);
-                Thread.Sleep(_delay);
+                Thread.Sleep(this.delay);
             }
 
             return results;

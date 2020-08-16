@@ -11,44 +11,44 @@
 
     public class SpotifyAuthorization : IDisposable
     {
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private readonly string _credentialsFileName;
-        private EmbedIOAuthServer _server = null;
+        private readonly string clientId;
+        private readonly string clientSecret;
+        private readonly string credentialsFileName;
+        private EmbedIOAuthServer server = null;
 
         public SpotifyAuthorization(string clientId, string clientSecret, string credentialsFileName)
         {
-            _clientId = clientId;
-            _clientSecret = clientSecret;
-            _credentialsFileName = credentialsFileName;
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.credentialsFileName = credentialsFileName;
         }
 
         public bool IsAuthorizationFinished { get; set; } = false;
 
         public void Dispose()
         {
-            _server?.Dispose();
+            this.server?.Dispose();
         }
 
         public IAuthenticator GetAuthenticator()
         {
-            var credentialsJson = File.ReadAllText(_credentialsFileName);
+            var credentialsJson = File.ReadAllText(this.credentialsFileName);
             var tokenResponse = JsonConvert.DeserializeObject<AuthorizationCodeTokenResponse>(credentialsJson);
 
-            var authenticator = new AuthorizationCodeAuthenticator(_clientId, _clientSecret, tokenResponse);
-            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(_credentialsFileName, JsonConvert.SerializeObject(token));
+            var authenticator = new AuthorizationCodeAuthenticator(this.clientId, this.clientSecret, tokenResponse);
+            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(this.credentialsFileName, JsonConvert.SerializeObject(token));
 
             return authenticator;
         }
 
         public async Task StartAuthorization()
         {
-            _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
+            this.server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
 
-            await _server.Start();
-            _server.AuthorizationCodeReceived += OnAuthorizationCodeReceived;
+            await this.server.Start();
+            this.server.AuthorizationCodeReceived += this.OnAuthorizationCodeReceived;
 
-            var loginRequest = new LoginRequest(_server.BaseUri, _clientId, LoginRequest.ResponseType.Code)
+            var loginRequest = new LoginRequest(this.server.BaseUri, this.clientId, LoginRequest.ResponseType.Code)
             {
                 Scope = new List<string> { UserLibraryRead, PlaylistModifyPublic }
             };
@@ -58,16 +58,16 @@
 
         private async Task OnAuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
         {
-            await _server.Stop();
-            _server.AuthorizationCodeReceived -= OnAuthorizationCodeReceived;
+            await this.server.Stop();
+            this.server.AuthorizationCodeReceived -= this.OnAuthorizationCodeReceived;
 
             AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
-                new AuthorizationCodeTokenRequest(_clientId, _clientSecret, response.Code, _server.BaseUri)
+                new AuthorizationCodeTokenRequest(this.clientId, this.clientSecret, response.Code, this.server.BaseUri)
             );
 
-            File.WriteAllText(_credentialsFileName, JsonConvert.SerializeObject(tokenResponse));
+            File.WriteAllText(this.credentialsFileName, JsonConvert.SerializeObject(tokenResponse));
 
-            IsAuthorizationFinished = true;
+            this.IsAuthorizationFinished = true;
         }
     }
 }

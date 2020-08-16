@@ -8,9 +8,9 @@
     {
         public OpenCliForm(string windowTitle)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            Text = windowTitle;
+            this.Text = windowTitle;
         }
 
         /// <see>
@@ -37,9 +37,9 @@
             {
                 process.EnableRaisingEvents = true;
 
-                process.OutputDataReceived += ProcessOutputDataReceived;
-                process.ErrorDataReceived += ProcessErrorDataReceived;
-                process.Exited += ProcessExited;
+                process.OutputDataReceived += this.ProcessOutputDataReceived;
+                process.ErrorDataReceived += this.ProcessErrorDataReceived;
+                process.Exited += this.ProcessExited;
 
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
@@ -54,18 +54,18 @@
         {
             Process process = sender as Process;
 
-            process.OutputDataReceived -= ProcessOutputDataReceived;
-            process.ErrorDataReceived -= ProcessErrorDataReceived;
-            process.Exited -= ProcessExited;
+            process.OutputDataReceived -= this.ProcessOutputDataReceived;
+            process.ErrorDataReceived -= this.ProcessErrorDataReceived;
+            process.Exited -= this.ProcessExited;
 
-            BeginInvoke((Action)(() => Activate()));
+            this.BeginInvoke((Action)(() => this.Activate()));
         }
 
         private void ProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(e?.Data))
             {
-                _outputBox.BeginInvoke((Action)(() => WriteLine("Error: " + e.Data)));
+                this.outputBox.BeginInvoke((Action)(() => this.WriteLine("Error: " + e.Data)));
             }
         }
 
@@ -73,14 +73,14 @@
         {
             if (!string.IsNullOrWhiteSpace(e?.Data))
             {
-                _outputBox.BeginInvoke((Action)(() => WriteLine(e.Data)));
+                this.outputBox.BeginInvoke((Action)(() => this.WriteLine(e.Data)));
             }
         }
 
         private void WriteLine(string text)
         {
-            _outputBox.AppendText(text + System.Environment.NewLine);
-            _outputBox.ScrollToCaret();
+            this.outputBox.AppendText(text + System.Environment.NewLine);
+            this.outputBox.ScrollToCaret();
         }
     }
 }

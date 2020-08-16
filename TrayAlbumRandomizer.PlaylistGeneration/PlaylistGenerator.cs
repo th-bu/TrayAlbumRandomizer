@@ -20,8 +20,8 @@
         const int TracksPerRequest = 100;
         const int TracksPerPlaylist = 9500;
 
-        private readonly string _albumListFileName;
-        private readonly SpotifyAuthorization _spotifyAuthorization;
+        private readonly string albumListFileName;
+        private readonly SpotifyAuthorization spotifyAuthorization;
 
         public PlaylistGenerator(string albumListFileName)
         {
@@ -37,9 +37,9 @@
                 clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
             }
 
-            _spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
+            this.spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
 
-            _albumListFileName = albumListFileName;
+            this.albumListFileName = albumListFileName;
         }
 
         public async Task GeneratePlaylist()
@@ -48,18 +48,18 @@
             {
                 if (File.Exists(CredentialsFileName))
                 {
-                    await StartPlaylistGeneration();
+                    await this.StartPlaylistGeneration();
                 }
                 else
                 {
-                    await _spotifyAuthorization.StartAuthorization();
-                    while (!_spotifyAuthorization.IsAuthorizationFinished)
+                    await this.spotifyAuthorization.StartAuthorization();
+                    while (!this.spotifyAuthorization.IsAuthorizationFinished)
                     {
                         // Todo: Exit condition in case the authorization is not successful
                         Thread.Sleep(1000);
                     }
 
-                    await StartPlaylistGeneration();
+                    await this.StartPlaylistGeneration();
                 }
             }
             catch (Exception exception)
@@ -72,13 +72,13 @@
         {
             var paginator = new SimplePaginatorWithDelay(100);
 
-            var authenticator = _spotifyAuthorization.GetAuthenticator();
+            var authenticator = this.spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
             var profile = await spotifyClient.UserProfile.Current();
 
-            var albums = GetAlbums(_albumListFileName).OrderBy(a => a.Artist).ThenBy(a => a.Album).ToList();
+            var albums = this.GetAlbums(this.albumListFileName).OrderBy(a => a.Artist).ThenBy(a => a.Album).ToList();
 
-            var cachedAlbums = GetCachedAlbums();
+            var cachedAlbums = this.GetCachedAlbums();
 
             List<string> trackUris = new List<string>();
             int counter = 0;
@@ -99,7 +99,7 @@
                 Thread.Sleep(100);
             }
 
-            SaveCachedAlbums(cachedAlbums);
+            this.SaveCachedAlbums(cachedAlbums);
 
             int playlistCounter = 1;
             while(trackUris.Any())

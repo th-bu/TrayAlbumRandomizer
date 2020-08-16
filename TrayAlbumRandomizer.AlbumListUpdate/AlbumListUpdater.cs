@@ -13,8 +13,8 @@
     public class AlbumListUpdater : IDisposable
     {
         private const string CredentialsFileName = "credentials.json";
-        private readonly string _albumListFileName;
-        private readonly SpotifyAuthorization _spotifyAuthorization;
+        private readonly string albumListFileName;
+        private readonly SpotifyAuthorization spotifyAuthorization;
 
         public AlbumListUpdater(string albumListFileName)
         {
@@ -30,9 +30,9 @@
                 clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
             }
 
-            _spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
+            this.spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
 
-            _albumListFileName = albumListFileName;
+            this.albumListFileName = albumListFileName;
         }
 
         public async Task UpdateAlbumList()
@@ -41,18 +41,18 @@
             {
                 if (File.Exists(CredentialsFileName))
                 {
-                    await StartUpdate();
+                    await this.StartUpdate();
                 }
                 else
                 {
-                    await _spotifyAuthorization.StartAuthorization();
-                    while (!_spotifyAuthorization.IsAuthorizationFinished)
+                    await this.spotifyAuthorization.StartAuthorization();
+                    while (!this.spotifyAuthorization.IsAuthorizationFinished)
                     {
                         // Todo: Exit condition in case the authorization is not successful
                         Thread.Sleep(1000);
                     }
 
-                    await StartUpdate();
+                    await this.StartUpdate();
                 }
             }
             catch (Exception exception)
@@ -63,7 +63,7 @@
 
         private async Task StartUpdate()
         {
-            var authenticator = _spotifyAuthorization.GetAuthenticator();
+            var authenticator = this.spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
             var paginator = new SimplePaginatorWithDelay(100);
 
@@ -72,12 +72,12 @@
             var savableAlbums = albumsFromSpotify.Select(a =>
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
-            File.WriteAllText(_albumListFileName, JsonConvert.SerializeObject(savableAlbums));
+            File.WriteAllText(this.albumListFileName, JsonConvert.SerializeObject(savableAlbums));
         }
 
         public void Dispose()
         {
-            _spotifyAuthorization.Dispose();
+            this.spotifyAuthorization.Dispose();
         }
     }
 }

@@ -8,8 +8,8 @@
 
     internal class OpenInSpotifyLogic
     {
-        private Random _random = new Random();
-        private List<SavableAlbum> _shuffledAlbums;
+        private readonly Random random = new Random();
+        private List<SavableAlbum> shuffledAlbums;
 
         public SavableAlbum[] Albums { get; set; }
         public NextMode NextMode { get; set; }
@@ -18,42 +18,42 @@
         {
             if (!openInBrowser)
             {
-                Process.Start("spotify:album:" + GetNextAlbumId());
+                Process.Start("spotify:album:" + this.GetNextAlbumId());
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(browserPath))
                 {
-                    Process.Start(browserPath, "https://open.spotify.com/album/" + GetNextAlbumId());
+                    Process.Start(browserPath, "https://open.spotify.com/album/" + this.GetNextAlbumId());
                 }
                 else
                 {
-                    Process.Start("https://open.spotify.com/album/" + GetNextAlbumId());
+                    Process.Start("https://open.spotify.com/album/" + this.GetNextAlbumId());
                 }
             }
         }
 
         public void ShuffleAlbums()
         {
-            _shuffledAlbums = Albums.OrderBy(a => _random.Next(int.MaxValue)).ToList();
+            this.shuffledAlbums = this.Albums.OrderBy(a => this.random.Next(int.MaxValue)).ToList();
         }
 
         private string GetNextAlbumId()
         {
-            if (NextMode == NextMode.Random)
+            if (this.NextMode == NextMode.Random)
             {
-                return Albums[_random.Next(Albums.Length)].Id;
+                return this.Albums[this.random.Next(this.Albums.Length)].Id;
             }
 
-            if (Albums.Length > 0)
+            if (this.Albums.Length > 0)
             {
-                if (_shuffledAlbums.Count == 0)
+                if (this.shuffledAlbums.Count == 0)
                 {
-                    ShuffleAlbums();
+                    this.ShuffleAlbums();
                 }
 
-                string albumId = _shuffledAlbums[0].Id;
-                _shuffledAlbums.RemoveAt(0);
+                string albumId = this.shuffledAlbums[0].Id;
+                this.shuffledAlbums.RemoveAt(0);
 
                 return albumId;
             }

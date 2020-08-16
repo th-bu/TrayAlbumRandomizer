@@ -28,28 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this._outputBox = new System.Windows.Forms.TextBox();
+            this.outputBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // _outputBox
             // 
-            this._outputBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.outputBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._outputBox.Location = new System.Drawing.Point(12, 12);
-            this._outputBox.Multiline = true;
-            this._outputBox.Name = "_outputBox";
-            this._outputBox.ReadOnly = true;
-            this._outputBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this._outputBox.Size = new System.Drawing.Size(515, 264);
-            this._outputBox.TabIndex = 0;
+            this.outputBox.Location = new System.Drawing.Point(12, 12);
+            this.outputBox.Multiline = true;
+            this.outputBox.Name = "outputBox";
+            this.outputBox.ReadOnly = true;
+            this.outputBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.outputBox.Size = new System.Drawing.Size(515, 264);
+            this.outputBox.TabIndex = 0;
             // 
             // OpenCliForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 288);
-            this.Controls.Add(this._outputBox);
+            this.Controls.Add(this.outputBox);
             this.Icon = global::TrayAlbumRandomizer.Properties.Resources.random_album_icon;
             this.Name = "OpenCliForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -61,6 +61,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox _outputBox;
+        private System.Windows.Forms.TextBox outputBox;
     }
 }
