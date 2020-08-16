@@ -9,37 +9,34 @@
     using System.Threading;
     using System.Threading.Tasks;
     using TrayAlbumRandomizer.Authorization;
+    using TrayAlbumRandomizer.Infrastructure;
 
     public class AlbumListUpdater : IDisposable
     {
-        private const string CredentialsFileName = "credentials.json";
-        private readonly string albumListFileName;
         private readonly SpotifyAuthorization spotifyAuthorization;
 
-        public AlbumListUpdater(string albumListFileName)
+        public AlbumListUpdater()
         {
-            string clientId = ConfigurationManager.AppSettings["SpotifyClientId"];
+            string clientId = ConfigurationManager.AppSettings[Constants.SpotifyClientIdSettingsName];
             if (string.IsNullOrWhiteSpace(clientId))
             {
-                clientId = Environment.GetEnvironmentVariable("SpotifyClientId");
+                clientId = Environment.GetEnvironmentVariable(Constants.SpotifyClientIdSettingsName);
             }
 
-            string clientSecret = ConfigurationManager.AppSettings["SpotifyClientSecret"];
+            string clientSecret = ConfigurationManager.AppSettings[Constants.SpotifyClientSecretSettingsName];
             if (string.IsNullOrWhiteSpace(clientSecret))
             {
-                clientSecret = Environment.GetEnvironmentVariable("SpotifyClientSecret");
+                clientSecret = Environment.GetEnvironmentVariable(Constants.SpotifyClientSecretSettingsName);
             }
 
-            this.spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret, CredentialsFileName);
-
-            this.albumListFileName = albumListFileName;
+            this.spotifyAuthorization = new SpotifyAuthorization(clientId, clientSecret);
         }
 
         public async Task UpdateAlbumList()
         {
             try
             {
-                if (File.Exists(CredentialsFileName))
+                if (File.Exists(Constants.CredentialsFileName))
                 {
                     await this.StartUpdate();
                 }
@@ -77,7 +74,7 @@
             var savableAlbums = albumsFromSpotify.Select(a =>
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
-            File.WriteAllText(this.albumListFileName, JsonConvert.SerializeObject(savableAlbums));
+            File.WriteAllText(Constants.AlbumListFileName, JsonConvert.SerializeObject(savableAlbums));
         }
     }
 }

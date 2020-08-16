@@ -4,6 +4,7 @@
     using System.Configuration;
     using System.Windows.Forms;
     using TrayAlbumRandomizer.AlbumListUpdate;
+    using TrayAlbumRandomizer.Infrastructure;
     using TrayAlbumRandomizer.Properties;
     using TrayAlbumRandomizer.Windows;
 
@@ -17,7 +18,6 @@
         private readonly OpenInSpotifyLogic openInSpotifyLogic;
         private readonly bool openInBrowser = false;
         private readonly string browserPath = string.Empty;
-        private readonly string albumListFileName = "albums.json";
         private readonly ContextMenu contextMenu;
 
         public TrayApplicationContext()
@@ -47,10 +47,9 @@
 
             this.openInBrowser = bool.Parse(ConfigurationManager.AppSettings["OpenInBrowser"]);
             this.browserPath = ConfigurationManager.AppSettings["BrowserPath"];
-            this.albumListFileName = ConfigurationManager.AppSettings["AlbumListFileName"] ?? this.albumListFileName;
 
             var albumsReader = new AlbumListReader();
-            this.albums = albumsReader.GetAlbums(this.albumListFileName);
+            this.albums = albumsReader.GetAlbums();
 
             this.openInSpotifyLogic = new OpenInSpotifyLogic
             {
@@ -71,7 +70,7 @@
             OpenCliForm openCliForm = new OpenCliForm("Update album list");
 
             openCliForm.Show();
-            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-u", this.albumListFileName);
+            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-u");
 
             openCliForm.FormClosed += this.OpenCliFormClosed;
         }
@@ -79,7 +78,7 @@
         private void OpenCliFormClosed(object sender, FormClosedEventArgs e)
         {
             var albumsReader = new AlbumListReader();
-            this.albums = albumsReader.GetAlbums(this.albumListFileName);
+            this.albums = albumsReader.GetAlbums();
 
             this.openInSpotifyLogic.ShuffleAlbums();
 
@@ -92,7 +91,7 @@
             OpenCliForm openCliForm = new OpenCliForm("Playlist generation");
 
             openCliForm.Show();
-            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-g", this.albumListFileName);
+            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-g");
         }
 
         private void TrayIconDoubleClick(object sender, EventArgs e)

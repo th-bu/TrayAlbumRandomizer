@@ -11,23 +11,23 @@
             switch (args[0])
             {
                 case "-u":
-                    UpdateAlbums(args[1]);
+                    UpdateAlbums();
                     break;
                 case "-g":
-                    GeneratePlaylist(args[1]);
+                    GeneratePlaylist();
                     break;
                 default:
                     break;
             }            
         }
 
-        private static void GeneratePlaylist(string albumListFileName)
+        private static void GeneratePlaylist()
         {
             Console.WriteLine("Playlist generation started.");
 
             try
             {
-                using (var playlistGenerator = new PlaylistGenerator(albumListFileName))
+                using (var playlistGenerator = new PlaylistGenerator())
                 {
                     playlistGenerator.GeneratePlaylist().Wait();
                 }
@@ -40,13 +40,13 @@
             Console.WriteLine("Playlist generation finished.");
         }
 
-        private static void UpdateAlbums(string albumListFileName)
+        private static void UpdateAlbums()
         {
             Console.WriteLine("Update started.");
 
             try
             {
-                using (var albumListUpdater = new AlbumListUpdater(albumListFileName))
+                using (var albumListUpdater = new AlbumListUpdater())
                 {
                     albumListUpdater.UpdateAlbumList().Wait();
                 }

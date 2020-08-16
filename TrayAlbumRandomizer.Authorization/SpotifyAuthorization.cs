@@ -7,20 +7,19 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
+    using TrayAlbumRandomizer.Infrastructure;
     using static SpotifyAPI.Web.Scopes;
 
     public class SpotifyAuthorization : IDisposable
     {
         private readonly string clientId;
         private readonly string clientSecret;
-        private readonly string credentialsFileName;
         private EmbedIOAuthServer server = null;
 
-        public SpotifyAuthorization(string clientId, string clientSecret, string credentialsFileName)
+        public SpotifyAuthorization(string clientId, string clientSecret)
         {
             this.clientId = clientId;
             this.clientSecret = clientSecret;
-            this.credentialsFileName = credentialsFileName;
         }
 
         public bool IsAuthorizationFinished { get; set; } = false;
@@ -32,18 +31,18 @@
 
         public IAuthenticator GetAuthenticator()
         {
-            var credentialsJson = File.ReadAllText(this.credentialsFileName);
+            var credentialsJson = File.ReadAllText(Constants.CredentialsFileName);
             var tokenResponse = JsonConvert.DeserializeObject<AuthorizationCodeTokenResponse>(credentialsJson);
 
             var authenticator = new AuthorizationCodeAuthenticator(this.clientId, this.clientSecret, tokenResponse);
-            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(this.credentialsFileName, JsonConvert.SerializeObject(token));
+            authenticator.TokenRefreshed += (sender, token) => File.WriteAllText(Constants.CredentialsFileName, JsonConvert.SerializeObject(token));
 
             return authenticator;
         }
 
         public async Task StartAuthorization()
         {
-            this.server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
+            this.server = new EmbedIOAuthServer(new Uri(Constants.CallbackUri), Constants.CallbackPort);
 
             await this.server.Start();
             this.server.AuthorizationCodeReceived += this.OnAuthorizationCodeReceived;
@@ -65,7 +64,7 @@
                 new AuthorizationCodeTokenRequest(this.clientId, this.clientSecret, response.Code, this.server.BaseUri)
             );
 
-            File.WriteAllText(this.credentialsFileName, JsonConvert.SerializeObject(tokenResponse));
+            File.WriteAllText(Constants.CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
 
             this.IsAuthorizationFinished = true;
         }

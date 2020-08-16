@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TrayAlbumRandomizer.Authorization\TrayAlbumRandomizer.Authorization.csproj" />
+    <ProjectReference Include="..\TrayAlbumRandomizer.Infrastructure\TrayAlbumRandomizer.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
