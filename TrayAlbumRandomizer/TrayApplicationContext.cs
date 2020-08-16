@@ -67,7 +67,7 @@
             OpenCliForm openCliForm = new OpenCliForm("Update album list");
 
             openCliForm.Show();
-            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", _albumListFileName);
+            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-u", _albumListFileName);
 
             openCliForm.FormClosed += OpenCliFormFormClosed;
         }

@@ -65,7 +65,7 @@
         {
             var authenticator = _spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
-            var paginator = new SimplePaginatorWithDelay(500);
+            var paginator = new SimplePaginatorWithDelay(100);
 
             var albumsFromSpotify = await spotifyClient.PaginateAll(await spotifyClient.Library.GetAlbums().ConfigureAwait(false), paginator);
 
