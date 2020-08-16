@@ -10,5 +10,6 @@
         public static readonly int CallbackPort = 5000;
         public static readonly string SpotifyClientIdSettingsName = "SpotifyClientId";
         public static readonly string SpotifyClientSecretSettingsName = "SpotifyClientSecret";
+        public static readonly string TrackBlacklistFileName = "trackblacklist.json";
     }
 }

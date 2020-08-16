@@ -12,6 +12,7 @@
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Authorization;
     using TrayAlbumRandomizer.Infrastructure;
+    using TrayAlbumRandomizer.TrackBlacklisting;
 
     public class PlaylistGenerator : IDisposable
     {
@@ -101,6 +102,10 @@
             this.SaveCachedAlbums(cachedAlbums);
 
             int playlistCounter = 1;
+
+            var blacklistHelper = new TrackBlacklistHelper();
+            trackUris = trackUris.Except(blacklistHelper.GetBlacklist()).ToList();
+
             while(trackUris.Any())
             {
                 string playlistId = await GetPlaylistId(string.Format(Constants.PlaylistName, playlistCounter++), paginator, spotifyClient, profile).ConfigureAwait(false);

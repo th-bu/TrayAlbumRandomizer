@@ -6,6 +6,7 @@
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Infrastructure;
     using TrayAlbumRandomizer.Properties;
+    using TrayAlbumRandomizer.TrackBlacklisting;
     using TrayAlbumRandomizer.Windows;
 
     /// <see>
@@ -30,7 +31,9 @@
                 new MenuItem("Shuffle", this.OptionShuffleClicked),
                 new MenuItem("-"),
                 new MenuItem("Update album list", this.UpdateAlbumListClicked),
+                new MenuItem("-"),
                 new MenuItem("Generate playlist", this.GeneratePlaylistClicked),
+                new MenuItem("Add track(s) from clipboard to blacklist", this.AddTracksToBlacklistClicked),
                 new MenuItem("-"),
                 new MenuItem("Exit", this.Exit) });
 
@@ -113,6 +116,22 @@
         {
             this.GeneratePlaylist();
         }
+
+        private void AddTracksToBlacklistClicked(object sender, EventArgs e)
+        {
+            var blacklistHelper = new TrackBlacklistHelper();
+            var text = Clipboard.GetText();
+
+            if (text.Contains("\n"))
+            {
+                blacklistHelper.AddRangeToBlacklist(text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            }
+            else
+            {
+                blacklistHelper.AddToBlacklist(text);
+            }
+        }
+
 
         private void OptionRandomClicked(object sender, EventArgs e)
         {

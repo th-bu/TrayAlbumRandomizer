@@ -137,6 +137,10 @@
       <Project>{7a23dd7f-b067-4998-962a-676521e525bf}</Project>
       <Name>TrayAlbumRandomizer.PlaylistGeneration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TrayAlbumRandomizer.TrackBlacklisting\TrayAlbumRandomizer.TrackBlacklisting.csproj">
+      <Project>{46CFEE4C-D761-4233-8009-93F13F74043D}</Project>
+      <Name>TrayAlbumRandomizer.TrackBlacklisting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
