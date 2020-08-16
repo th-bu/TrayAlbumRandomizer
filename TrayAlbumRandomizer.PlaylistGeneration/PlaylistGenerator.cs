@@ -15,6 +15,7 @@
     public class PlaylistGenerator
     {
         private const string CredentialsFileName = "credentials.json";
+        private const string TracksCacheFileName = "trackscache.json";
         const string PlaylistName = "Randomizer #{0} (auto generated)";
         const int TracksPerRequest = 100;
         const int TracksPerPlaylist = 9500;
@@ -77,35 +78,47 @@
 
             var albums = GetAlbums(_albumListFileName).OrderBy(a => a.Artist).ThenBy(a => a.Album).ToList();
 
-            List<SimpleTrack> tracks = new List<SimpleTrack>();
+            var cachedAlbums = GetCachedAlbums();
+
+            List<string> trackUris = new List<string>();
             int counter = 0;
 
-            foreach (var album in albums)
+            var cachedAlbumsInLibrary = cachedAlbums.Where(ca => albums.Select(a => a.Id).Contains(ca.Id));
+            trackUris.AddRange(cachedAlbumsInLibrary.SelectMany(ca => ca.TrackUris));
+
+            var albumsNotInCache = albums.Where(a => !cachedAlbums.Any(ca => ca.Id == a.Id)).ToList();
+
+            foreach (var album in albumsNotInCache)
             {
-                Console.WriteLine($"Processing {counter++}/{albums.Count}: {album.Artist} - {album.Album}");
-                var albumTracks = (await spotifyClient.PaginateAll(await spotifyClient.Albums.GetTracks(album.Id).ConfigureAwait(false), paginator)).ToList();
-                tracks.AddRange(albumTracks);
+                Console.WriteLine($"Processing {++counter}/{albumsNotInCache.Count}: {album.Artist} - {album.Album}");
+                var albumTrackUris = (await spotifyClient.PaginateAll(await spotifyClient.Albums.GetTracks(album.Id).ConfigureAwait(false), paginator)).Select(at => at.Uri).ToList();
+                trackUris.AddRange(albumTrackUris);
+
+                cachedAlbums.Add(new AlbumWithTracks{ Id = album.Id, TrackUris = albumTrackUris });
+
                 Thread.Sleep(100);
             }
 
+            SaveCachedAlbums(cachedAlbums);
+
             int playlistCounter = 1;
-            while(tracks.Any())
+            while(trackUris.Any())
             {
                 string playlistId = await GetPlaylistId(string.Format(PlaylistName, playlistCounter++), paginator, spotifyClient, profile).ConfigureAwait(false);
-                await AddTracksToPlaylist(spotifyClient, playlistId, tracks.Take(TracksPerPlaylist).ToList());
-                tracks.RemoveRange(0, Math.Min(TracksPerPlaylist, tracks.Count));
+                await AddTracksToPlaylist(spotifyClient, playlistId, trackUris.Take(TracksPerPlaylist).ToList());
+                trackUris.RemoveRange(0, Math.Min(TracksPerPlaylist, trackUris.Count));
             }
         }
 
-        private static async Task AddTracksToPlaylist(SpotifyClient spotifyClient, string playlistId, List<SimpleTrack> tracks)
+        private static async Task AddTracksToPlaylist(SpotifyClient spotifyClient, string playlistId, List<string> trackUris)
         {
             await spotifyClient.Playlists.ReplaceItems(playlistId, new PlaylistReplaceItemsRequest(new List<string>()));
-            int trackCount = tracks.Count;
-            while (tracks.Any())
+            int trackCount = trackUris.Count;
+            while (trackUris.Any())
             {
-                Console.WriteLine($"Tracks processing for playlist: {trackCount - tracks.Count}");
-                await spotifyClient.Playlists.AddItems(playlistId, new PlaylistAddItemsRequest(tracks.Take(TracksPerRequest).Select(t => t.Uri).ToArray()));
-                tracks.RemoveRange(0, Math.Min(TracksPerRequest, tracks.Count));
+                Console.WriteLine($"Tracks processing for playlist: {trackCount - trackUris.Count}");
+                await spotifyClient.Playlists.AddItems(playlistId, new PlaylistAddItemsRequest(trackUris.Take(TracksPerRequest).ToArray()));
+                trackUris.RemoveRange(0, Math.Min(TracksPerRequest, trackUris.Count));
                 Thread.Sleep(100);
             }
         }
@@ -135,6 +148,22 @@
 
             var json = File.ReadAllText(albumsPath);
             return JsonConvert.DeserializeObject<SavableAlbum[]>(json);
+        }
+
+        private List<AlbumWithTracks> GetCachedAlbums()
+        {
+            if (!File.Exists(TracksCacheFileName))
+            {
+                return new List<AlbumWithTracks>();
+            }
+
+            var json = File.ReadAllText(TracksCacheFileName);
+            return JsonConvert.DeserializeObject<List<AlbumWithTracks>>(json);
+        }
+
+        private void SaveCachedAlbums(List<AlbumWithTracks> albums)
+        {
+            File.WriteAllText(TracksCacheFileName, JsonConvert.SerializeObject(albums));
         }
     }
 }
