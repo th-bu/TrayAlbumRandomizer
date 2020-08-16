@@ -68,7 +68,7 @@
 
         private async Task StartPlaylistGeneration()
         {
-            const int tracksPerPlaylist = 9500;
+            const int tracksPerPlaylist = 9900;
 
             var paginator = new SimplePaginatorWithDelay(100);
 
