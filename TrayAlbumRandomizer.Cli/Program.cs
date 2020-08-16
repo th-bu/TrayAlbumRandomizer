@@ -27,8 +27,10 @@
 
             try
             {
-                PlaylistGenerator playlistGenerator = new PlaylistGenerator(albumListFileName);
-                playlistGenerator.GeneratePlaylist().Wait();
+                using (var playlistGenerator = new PlaylistGenerator(albumListFileName))
+                {
+                    playlistGenerator.GeneratePlaylist().Wait();
+                }
             }
             catch (Exception exception)
             {

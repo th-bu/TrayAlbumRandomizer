@@ -12,7 +12,7 @@
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Authorization;
 
-    public class PlaylistGenerator
+    public class PlaylistGenerator : IDisposable
     {
         private const string CredentialsFileName = "credentials.json";
         private const string TracksCacheFileName = "trackscache.json";
@@ -66,6 +66,11 @@
             {
                 Console.Error.WriteLine(exception.Message);
             }
+        }
+
+        public void Dispose()
+        {
+            this.spotifyAuthorization.Dispose();
         }
 
         private async Task StartPlaylistGeneration()

@@ -61,6 +61,11 @@
             }
         }
 
+        public void Dispose()
+        {
+            this.spotifyAuthorization.Dispose();
+        }
+
         private async Task StartUpdate()
         {
             var authenticator = this.spotifyAuthorization.GetAuthenticator();
@@ -73,11 +78,6 @@
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
             File.WriteAllText(this.albumListFileName, JsonConvert.SerializeObject(savableAlbums));
-        }
-
-        public void Dispose()
-        {
-            this.spotifyAuthorization.Dispose();
         }
     }
 }
