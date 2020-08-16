@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrayAlbumRandomizer.AlbumLi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrayAlbumRandomizer.Authorization", "TrayAlbumRandomizer.Authorization\TrayAlbumRandomizer.Authorization.csproj", "{A86AA92A-A617-4541-9674-4586B7E7B3D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayAlbumRandomizer.Cli.AlbumListUpdater", "TrayAlbumRandomizer.Cli.AlbumListUpdater\TrayAlbumRandomizer.Cli.AlbumListUpdater.csproj", "{4AEE55E6-D14E-4F86-9814-2AFB05EFFE25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayAlbumRandomizer.Cli", "TrayAlbumRandomizer.Cli\TrayAlbumRandomizer.Cli.csproj", "{4AEE55E6-D14E-4F86-9814-2AFB05EFFE25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

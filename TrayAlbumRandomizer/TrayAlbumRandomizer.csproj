@@ -125,9 +125,9 @@
       <Project>{a86aa92a-a617-4541-9674-4586b7e7b3d4}</Project>
       <Name>TrayAlbumRandomizer.Authorization</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TrayAlbumRandomizer.Cli.AlbumListUpdater\TrayAlbumRandomizer.Cli.AlbumListUpdater.csproj">
+    <ProjectReference Include="..\TrayAlbumRandomizer.Cli\TrayAlbumRandomizer.Cli.csproj">
       <Project>{4aee55e6-d14e-4f86-9814-2afb05effe25}</Project>
-      <Name>TrayAlbumRandomizer.Cli.AlbumListUpdater</Name>
+      <Name>TrayAlbumRandomizer.Cli</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

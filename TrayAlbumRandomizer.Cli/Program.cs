@@ -1,4 +1,4 @@
-﻿namespace TrayAlbumRandomizer.Cli.AlbumListUpdater
+﻿namespace TrayAlbumRandomizer.Cli
 {
     using System;
     using TrayAlbumRandomizer.AlbumListUpdate;

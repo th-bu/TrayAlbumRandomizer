@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TrayAlbumRandomizer.Cli.AlbumListUpdater")]
+[assembly: AssemblyTitle("TrayAlbumRandomizer.Cli")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TrayAlbumRandomizer.Cli.AlbumListUpdater")]
+[assembly: AssemblyProduct("TrayAlbumRandomizer.Cli")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
