@@ -2,16 +2,56 @@
 {
     using System;
     using TrayAlbumRandomizer.AlbumListUpdate;
+    using TrayAlbumRandomizer.PlaylistGeneration;
 
     class Program
     {
         static void Main(string[] args)
         {
+            switch (args[0])
+            {
+                case "-u":
+                    UpdateAlbums(args[1]);
+                    break;
+                case "-g":
+                    GeneratePlaylist(args[1]);
+                    break;
+                default:
+                    break;
+            }            
+        }
+
+        private static void GeneratePlaylist(string albumListFileName)
+        {
+            Console.WriteLine("Playlist generation started.");
+
+            try
+            {
+                PlaylistGenerator playlistGenerator = new PlaylistGenerator(albumListFileName);
+                playlistGenerator.GeneratePlaylist().Wait();
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine(exception.Message);
+            }
+
+            Console.WriteLine("Playlist generation finished.");
+        }
+
+        private static void UpdateAlbums(string albumListFileName)
+        {
             Console.WriteLine("Update started.");
 
-            using (var albumListUpdater = new AlbumListUpdater(args[0]))
+            try
             {
-                albumListUpdater.UpdateAlbumList().Wait();
+                using (var albumListUpdater = new AlbumListUpdater(albumListFileName))
+                {
+                    albumListUpdater.UpdateAlbumList().Wait();
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine(exception.Message);
             }
 
             Console.WriteLine("Update finished.");

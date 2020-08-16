@@ -14,7 +14,7 @@
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly string _credentialsFileName;
-        private readonly EmbedIOAuthServer _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
+        private EmbedIOAuthServer _server = null;
 
         public SpotifyAuthorization(string clientId, string clientSecret, string credentialsFileName)
         {
@@ -27,7 +27,7 @@
 
         public void Dispose()
         {
-            _server.Dispose();
+            _server?.Dispose();
         }
 
         public IAuthenticator GetAuthenticator()
@@ -43,12 +43,14 @@
 
         public async Task StartAuthorization()
         {
+            _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
+
             await _server.Start();
             _server.AuthorizationCodeReceived += OnAuthorizationCodeReceived;
 
             var loginRequest = new LoginRequest(_server.BaseUri, _clientId, LoginRequest.ResponseType.Code)
             {
-                Scope = new List<string> { UserLibraryRead }
+                Scope = new List<string> { UserLibraryRead, PlaylistModifyPublic }
             };
 
             BrowserUtil.Open(loginRequest.ToUri());
