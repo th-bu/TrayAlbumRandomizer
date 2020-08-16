@@ -30,6 +30,7 @@
                     new MenuItem("Shuffle", OptionShuffleClicked),
                     new MenuItem("-"),
                     new MenuItem("Update album list", UpdateAlbumListClicked),
+                    new MenuItem("Generate playlist", GeneratePlaylistClicked),
                     new MenuItem("-"),
                     new MenuItem("Exit", Exit) });
 
@@ -69,10 +70,10 @@
             openCliForm.Show();
             openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-u", _albumListFileName);
 
-            openCliForm.FormClosed += OpenCliFormFormClosed;
+            openCliForm.FormClosed += OpenCliFormClosed;
         }
 
-        private void OpenCliFormFormClosed(object sender, FormClosedEventArgs e)
+        private void OpenCliFormClosed(object sender, FormClosedEventArgs e)
         {
             var albumsReader = new AlbumListReader();
             _albums = albumsReader.GetAlbums(_albumListFileName);
@@ -80,7 +81,15 @@
             _openInSpotifyLogic.ShuffleAlbums();
 
             var openCliForm = sender as OpenCliForm;
-            openCliForm.FormClosed -= OpenCliFormFormClosed;
+            openCliForm.FormClosed -= OpenCliFormClosed;
+        }
+
+        private void GeneratePlaylist()
+        {
+            OpenCliForm openCliForm = new OpenCliForm("Playlist generation");
+
+            openCliForm.Show();
+            openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-g", _albumListFileName);
         }
 
         private void TrayIconDoubleClick(object sender, EventArgs e)
@@ -96,6 +105,11 @@
         private void UpdateAlbumListClicked(object sender, EventArgs e)
         {
             UpdateAlbumList();
+        }
+
+        private void GeneratePlaylistClicked(object sender, EventArgs e)
+        {
+            GeneratePlaylist();
         }
 
         private void OptionRandomClicked(object sender, EventArgs e)
