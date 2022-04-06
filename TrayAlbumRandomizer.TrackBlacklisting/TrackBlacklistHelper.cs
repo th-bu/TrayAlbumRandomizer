@@ -48,6 +48,5 @@
 
             this.SaveBlacklist(blacklist);
         }
-
     }
 }

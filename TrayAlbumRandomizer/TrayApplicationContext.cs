@@ -4,7 +4,6 @@
     using System.Configuration;
     using System.Windows.Forms;
     using TrayAlbumRandomizer.AlbumListUpdate;
-    using TrayAlbumRandomizer.Infrastructure;
     using TrayAlbumRandomizer.Properties;
     using TrayAlbumRandomizer.TrackBlacklisting;
     using TrayAlbumRandomizer.Windows;
