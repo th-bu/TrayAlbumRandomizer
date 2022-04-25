@@ -2,19 +2,20 @@
 {
     using Newtonsoft.Json;
     using System.IO;
+    using System;
     using TrayAlbumRandomizer.AlbumListUpdate;
     using TrayAlbumRandomizer.Infrastructure;
 
-    public class AlbumListReader
+    public static class AlbumListReader
     {
-        public SavableAlbum[] GetAlbums()
+        public static SavableAlbum[] GetAlbums()
         {
             if (!File.Exists(Constants.AlbumListFileName))
             {
-                return new SavableAlbum[0];
+                return Array.Empty<SavableAlbum>();
             }
 
-            var json = File.ReadAllText(Constants.AlbumListFileName);
+            string json = File.ReadAllText(Constants.AlbumListFileName);
             return JsonConvert.DeserializeObject<SavableAlbum[]>(json);
         }
     }

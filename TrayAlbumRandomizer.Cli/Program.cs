@@ -16,8 +16,6 @@
                 case "-g":
                     GeneratePlaylist();
                     break;
-                default:
-                    break;
             }            
         }
 

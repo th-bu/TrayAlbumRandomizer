@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayAlbumRandomizer", "TrayAlbumRandomizer\TrayAlbumRandomizer.csproj", "{4AC66813-024C-43C5-A3DD-A79E25A650E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{93C20AFB-60AB-43F8-BCA9-62099C953C7D}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrayAlbumRandomizer.AlbumListUpdate", "TrayAlbumRandomizer.AlbumListUpdate\TrayAlbumRandomizer.AlbumListUpdate.csproj", "{A78C3BAD-BA1E-47DF-BDC6-21F6ACD0C157}"
 EndProject

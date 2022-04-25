@@ -7,54 +7,75 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class SimplePaginatorWithDelay : IPaginator
+    public sealed class SimplePaginatorWithDelay : IPaginator
     {
-        private readonly int delay = 0;
+        private readonly int delay;
 
         public SimplePaginatorWithDelay(int delay)
         {
             this.delay = delay;
         }
 
-        protected virtual Task<bool> ShouldContinue<T>(List<T> results, IPaginatable<T> page)
+        private static Task<bool> ShouldContinue<T>(List<T> results, IPaginatable<T> page)
         {
             return Task.FromResult(true);
         }
 
-        protected virtual Task<bool> ShouldContinue<T, TNext>(List<T> results, IPaginatable<T, TNext> page)
+        private static Task<bool> ShouldContinue<T, TNext>(List<T> results, IPaginatable<T, TNext> page)
         {
             return Task.FromResult(true);
         }
 
         public async Task<IList<T>> PaginateAll<T>(IPaginatable<T> firstPage, IAPIConnector connector)
         {
-            var page = firstPage;
+            IPaginatable<T> page = firstPage;
             var results = new List<T>();
+
+            if (firstPage.Items == null)
+            {
+                return results;
+            }
+
             results.AddRange(firstPage.Items);
 
-            while (page.Next != null && await this.ShouldContinue(results, page).ConfigureAwait(false))
+            while (page.Next != null && await ShouldContinue(results, page).ConfigureAwait(false))
             {
                 page = await connector.Get<Paging<T>>(new Uri(page.Next, UriKind.Absolute)).ConfigureAwait(false);
-                results.AddRange(page.Items);
+                    
+                if (page.Items != null)
+                {
+                    results.AddRange(page.Items);
+                }
+
                 Thread.Sleep(this.delay);
             }
 
             return results;
         }
 
-        public async Task<IList<T>> PaginateAll<T, TNext>(
-          IPaginatable<T, TNext> firstPage, Func<TNext, IPaginatable<T, TNext>> mapper, IAPIConnector connector
-        )
+        public async Task<IList<T>> PaginateAll<T, TNext>(IPaginatable<T, TNext> firstPage, Func<TNext, IPaginatable<T, TNext>> mapper,
+            IAPIConnector connector)
         {
-            var page = firstPage;
+            IPaginatable<T, TNext> page = firstPage;
             var results = new List<T>();
+            
+            if (firstPage.Items == null)
+            {
+                return results;
+            }
+
             results.AddRange(firstPage.Items);
 
-            while (page.Next != null && await this.ShouldContinue(results, page).ConfigureAwait(false))
+            while (page.Next != null && await ShouldContinue(results, page).ConfigureAwait(false))
             {
-                var next = await connector.Get<TNext>(new Uri(page.Next, UriKind.Absolute)).ConfigureAwait(false);
+                TNext next = await connector.Get<TNext>(new Uri(page.Next, UriKind.Absolute)).ConfigureAwait(false);
                 page = mapper(next);
-                results.AddRange(page.Items);
+                
+                if (page.Items != null)
+                {
+                    results.AddRange(page.Items);
+                }
+
                 Thread.Sleep(this.delay);
             }
 

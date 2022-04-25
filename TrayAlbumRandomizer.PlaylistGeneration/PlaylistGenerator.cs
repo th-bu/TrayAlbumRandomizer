@@ -57,7 +57,7 @@
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine(exception.Message);
+                await Console.Error.WriteLineAsync(exception.Message);
             }
         }
 
@@ -72,26 +72,26 @@
 
             var paginator = new SimplePaginatorWithDelay(100);
 
-            var authenticator = this.spotifyAuthorization.GetAuthenticator();
+            IAuthenticator authenticator = this.spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
-            var profile = await spotifyClient.UserProfile.Current();
+            PrivateUser profile = await spotifyClient.UserProfile.Current();
 
-            var albums = this.GetAlbums().OrderBy(a => a.Artist).ThenBy(a => a.Album).ToList();
+            List<SavableAlbum> albums = GetAlbums().OrderBy(a => a.Artist).ThenBy(a => a.Album).ToList();
 
-            var cachedAlbums = this.GetCachedAlbums();
+            List<AlbumWithTracks> cachedAlbums = GetCachedAlbums();
 
-            List<string> trackUris = new List<string>();
+            var trackUris = new List<string>();
             int counter = 0;
 
-            var cachedAlbumsInLibrary = cachedAlbums.Where(ca => albums.Select(a => a.Id).Contains(ca.Id));
+            IEnumerable<AlbumWithTracks> cachedAlbumsInLibrary = cachedAlbums.Where(ca => albums.Select(a => a.Id).Contains(ca.Id));
             trackUris.AddRange(cachedAlbumsInLibrary.SelectMany(ca => ca.TrackUris));
 
-            var albumsNotInCache = albums.Where(a => !cachedAlbums.Any(ca => ca.Id == a.Id)).ToList();
+            List<SavableAlbum> albumsNotInCache = albums.Where(a => cachedAlbums.All(ca => ca.Id != a.Id)).ToList();
 
-            foreach (var album in albumsNotInCache)
+            foreach (SavableAlbum album in albumsNotInCache)
             {
                 Console.WriteLine($"Processing {++counter}/{albumsNotInCache.Count}: {album.Artist} - {album.Album}");
-                var albumTrackUris = (await spotifyClient.PaginateAll(await spotifyClient.Albums.GetTracks(album.Id).ConfigureAwait(false), paginator)).Select(at => at.Uri).ToList();
+                List<string> albumTrackUris = (await spotifyClient.PaginateAll(await spotifyClient.Albums.GetTracks(album.Id).ConfigureAwait(false), paginator)).Select(at => at.Uri).ToList();
                 trackUris.AddRange(albumTrackUris);
 
                 cachedAlbums.Add(new AlbumWithTracks{ Id = album.Id, TrackUris = albumTrackUris });
@@ -99,12 +99,11 @@
                 Thread.Sleep(100);
             }
 
-            this.SaveCachedAlbums(cachedAlbums);
+            SaveCachedAlbums(cachedAlbums);
 
             int playlistCounter = 1;
 
-            var blacklistHelper = new TrackBlacklistHelper();
-            trackUris = trackUris.Except(blacklistHelper.GetBlacklist()).ToList();
+            trackUris = trackUris.Except(TrackBlacklistHelper.GetBlacklist()).ToList();
 
             while(trackUris.Any())
             {
@@ -131,8 +130,8 @@
 
         private static async Task<string> GetPlaylistId(string playlistName, SimplePaginatorWithDelay paginator, SpotifyClient spotifyClient, PrivateUser profile)
         {
-            var playlists = await spotifyClient.PaginateAll(await spotifyClient.Playlists.GetUsers(profile.Id).ConfigureAwait(false), paginator);
-            var playlist = playlists.FirstOrDefault(pl => pl.Name == playlistName);
+            IList<SimplePlaylist> playlists = await spotifyClient.PaginateAll(await spotifyClient.Playlists.GetUsers(profile.Id).ConfigureAwait(false), paginator);
+            SimplePlaylist playlist = playlists.FirstOrDefault(pl => pl.Name == playlistName);
 
             FullPlaylist createdPlaylist = null;
 
@@ -141,33 +140,33 @@
                 createdPlaylist = await spotifyClient.Playlists.Create(profile.Id, new PlaylistCreateRequest(playlistName));
             }
 
-            string playlistId = playlist?.Id ?? createdPlaylist?.Id;
+            string playlistId = playlist?.Id ?? createdPlaylist.Id;
             return playlistId;
         }
 
-        private SavableAlbum[] GetAlbums()
+        private static IEnumerable<SavableAlbum> GetAlbums()
         {
             if (!File.Exists(Constants.AlbumListFileName))
             {
-                return new SavableAlbum[0];
+                return Array.Empty<SavableAlbum>();
             }
 
-            var json = File.ReadAllText(Constants.AlbumListFileName);
+            string json = File.ReadAllText(Constants.AlbumListFileName);
             return JsonConvert.DeserializeObject<SavableAlbum[]>(json);
         }
 
-        private List<AlbumWithTracks> GetCachedAlbums()
+        private static List<AlbumWithTracks> GetCachedAlbums()
         {
             if (!File.Exists(Constants.TracksCacheFileName))
             {
                 return new List<AlbumWithTracks>();
             }
 
-            var json = File.ReadAllText(Constants.TracksCacheFileName);
+            string json = File.ReadAllText(Constants.TracksCacheFileName);
             return JsonConvert.DeserializeObject<List<AlbumWithTracks>>(json);
         }
 
-        private void SaveCachedAlbums(List<AlbumWithTracks> albums)
+        private static void SaveCachedAlbums(List<AlbumWithTracks> albums)
         {
             File.WriteAllText(Constants.TracksCacheFileName, JsonConvert.SerializeObject(albums));
         }

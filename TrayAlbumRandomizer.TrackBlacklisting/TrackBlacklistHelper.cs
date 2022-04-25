@@ -5,40 +5,40 @@
     using System.IO;
     using TrayAlbumRandomizer.Infrastructure;
 
-    public class TrackBlacklistHelper
+    public static class TrackBlacklistHelper
     {
-        public List<string> GetBlacklist()
+        public static List<string> GetBlacklist()
         {
             if (!File.Exists(Constants.TrackBlacklistFileName))
             {
                 return new List<string>();
             }
 
-            var json = File.ReadAllText(Constants.TrackBlacklistFileName);
+            string json = File.ReadAllText(Constants.TrackBlacklistFileName);
             return JsonConvert.DeserializeObject<List<string>>(json);
         }
 
-        public void SaveBlacklist(List<string> blacklist)
+        private static void SaveBlacklist(List<string> blacklist)
         {
             File.WriteAllText(Constants.TrackBlacklistFileName, JsonConvert.SerializeObject(blacklist));
         }
 
-        public void AddToBlacklist(string trackUri)
+        public static void AddToBlacklist(string trackUri)
         {
-            var blacklist = this.GetBlacklist();
+            List<string> blacklist = GetBlacklist();
 
             if (!blacklist.Contains(trackUri))
             {
                 blacklist.Add(trackUri);
-                this.SaveBlacklist(blacklist);
+                SaveBlacklist(blacklist);
             }
         }
 
-        public void AddRangeToBlacklist(IEnumerable<string> trackUris)
+        public static void AddRangeToBlacklist(IEnumerable<string> trackUris)
         {
-            var blacklist = this.GetBlacklist();
+            List<string> blacklist = GetBlacklist();
 
-            foreach (var trackUri in trackUris)
+            foreach (string trackUri in trackUris)
             {
                 if (!blacklist.Contains(trackUri))
                 {
@@ -46,7 +46,7 @@
                 }
             }
 
-            this.SaveBlacklist(blacklist);
+            SaveBlacklist(blacklist);
         }
     }
 }

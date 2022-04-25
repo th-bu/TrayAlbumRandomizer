@@ -16,14 +16,14 @@
         private readonly NotifyIcon trayIcon;
         private SavableAlbum[] albums;
         private readonly OpenInSpotifyLogic openInSpotifyLogic;
-        private readonly bool openInBrowser = false;
-        private readonly string browserPath = string.Empty;
+        private readonly bool openInBrowser;
+        private readonly string browserPath;
         private readonly ContextMenu contextMenu;
 
         public TrayApplicationContext()
         {
             // Initialize Tray Icon
-            this.contextMenu = new ContextMenu(new MenuItem[] {
+            this.contextMenu = new ContextMenu(new[] {
                 new MenuItem("Open next album", this.OpenRandomAlbumClicked),
                 new MenuItem("-"),
                 new MenuItem("Random", this.OptionRandomClicked),
@@ -31,15 +31,15 @@
                 new MenuItem("-"),
                 new MenuItem("Update album list", this.UpdateAlbumListClicked),
                 new MenuItem("-"),
-                new MenuItem("Generate playlist", this.GeneratePlaylistClicked),
-                new MenuItem("Add track(s) from clipboard to blacklist", this.AddTracksToBlacklistClicked),
+                new MenuItem("Generate playlist", GeneratePlaylistClicked),
+                new MenuItem("Add track(s) from clipboard to blacklist", AddTracksToBlacklistClicked),
                 new MenuItem("-"),
                 new MenuItem("Exit", this.Exit) });
 
             this.trayIcon = new NotifyIcon()
             {
                 Icon = Resources.random_album_icon,
-                ContextMenu = contextMenu,
+                ContextMenu = this.contextMenu,
                 Visible = true
             };
 
@@ -50,8 +50,7 @@
             this.openInBrowser = bool.Parse(ConfigurationManager.AppSettings["OpenInBrowser"]);
             this.browserPath = ConfigurationManager.AppSettings["BrowserPath"];
 
-            var albumsReader = new AlbumListReader();
-            this.albums = albumsReader.GetAlbums();
+            this.albums = AlbumListReader.GetAlbums();
 
             this.openInSpotifyLogic = new OpenInSpotifyLogic
             {
@@ -69,7 +68,7 @@
 
         private void UpdateAlbumList()
         {
-            OpenCliForm openCliForm = new OpenCliForm("Update album list");
+            var openCliForm = new OpenCliForm("Update album list");
 
             openCliForm.Show();
             openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-u");
@@ -79,18 +78,19 @@
 
         private void OpenCliFormClosed(object sender, FormClosedEventArgs e)
         {
-            var albumsReader = new AlbumListReader();
-            this.albums = albumsReader.GetAlbums();
+            this.albums = AlbumListReader.GetAlbums();
 
             this.openInSpotifyLogic.ShuffleAlbums();
 
-            var openCliForm = sender as OpenCliForm;
-            openCliForm.FormClosed -= this.OpenCliFormClosed;
+            if (sender is OpenCliForm openCliForm)
+            {
+                openCliForm.FormClosed -= this.OpenCliFormClosed;
+            }
         }
 
-        private void GeneratePlaylist()
+        private static void GeneratePlaylist()
         {
-            OpenCliForm openCliForm = new OpenCliForm("Playlist generation");
+            var openCliForm = new OpenCliForm("Playlist generation");
 
             openCliForm.Show();
             openCliForm.OpenProcess("TrayAlbumRandomizer.Cli.exe", "-g");
@@ -111,23 +111,22 @@
             this.UpdateAlbumList();
         }
 
-        private void GeneratePlaylistClicked(object sender, EventArgs e)
+        private static void GeneratePlaylistClicked(object sender, EventArgs e)
         {
-            this.GeneratePlaylist();
+            GeneratePlaylist();
         }
 
-        private void AddTracksToBlacklistClicked(object sender, EventArgs e)
+        private static void AddTracksToBlacklistClicked(object sender, EventArgs e)
         {
-            var blacklistHelper = new TrackBlacklistHelper();
-            var text = Clipboard.GetText();
+            string text = Clipboard.GetText();
 
             if (text.Contains("\n"))
             {
-                blacklistHelper.AddRangeToBlacklist(text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                TrackBlacklistHelper.AddRangeToBlacklist(text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
             else
             {
-                blacklistHelper.AddToBlacklist(text);
+                TrackBlacklistHelper.AddToBlacklist(text);
             }
         }
 

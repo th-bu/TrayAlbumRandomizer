@@ -14,7 +14,7 @@
     {
         private readonly string clientId;
         private readonly string clientSecret;
-        private EmbedIOAuthServer server = null;
+        private EmbedIOAuthServer server;
 
         public SpotifyAuthorization(string clientId, string clientSecret)
         {
@@ -22,7 +22,7 @@
             this.clientSecret = clientSecret;
         }
 
-        public bool IsAuthorizationFinished { get; set; } = false;
+        public bool IsAuthorizationFinished { get; private set; }
 
         public void Dispose()
         {
@@ -31,7 +31,7 @@
 
         public IAuthenticator GetAuthenticator()
         {
-            var credentialsJson = File.ReadAllText(Constants.CredentialsFileName);
+            string credentialsJson = File.ReadAllText(Constants.CredentialsFileName);
             var tokenResponse = JsonConvert.DeserializeObject<AuthorizationCodeTokenResponse>(credentialsJson);
 
             var authenticator = new AuthorizationCodeAuthenticator(this.clientId, this.clientSecret, tokenResponse);
@@ -60,9 +60,9 @@
             await this.server.Stop();
             this.server.AuthorizationCodeReceived -= this.OnAuthorizationCodeReceived;
 
-            AuthorizationCodeTokenResponse tokenResponse = await new OAuthClient().RequestToken(
-                new AuthorizationCodeTokenRequest(this.clientId, this.clientSecret, response.Code, this.server.BaseUri)
-            );
+            AuthorizationCodeTokenResponse tokenResponse =
+                await new OAuthClient().RequestToken(new AuthorizationCodeTokenRequest(this.clientId, this.clientSecret, response.Code,
+                    this.server.BaseUri));
 
             File.WriteAllText(Constants.CredentialsFileName, JsonConvert.SerializeObject(tokenResponse));
 

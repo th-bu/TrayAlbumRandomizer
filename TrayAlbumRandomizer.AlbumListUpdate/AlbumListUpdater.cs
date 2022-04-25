@@ -3,6 +3,7 @@
     using Newtonsoft.Json;
     using SpotifyAPI.Web;
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
     using System.IO;
     using System.Linq;
@@ -54,7 +55,7 @@
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine(exception.Message);
+                await Console.Error.WriteLineAsync(exception.Message);
             }
         }
 
@@ -65,13 +66,13 @@
 
         private async Task StartUpdate()
         {
-            var authenticator = this.spotifyAuthorization.GetAuthenticator();
+            IAuthenticator authenticator = this.spotifyAuthorization.GetAuthenticator();
             var spotifyClient = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator));
             var paginator = new SimplePaginatorWithDelay(100);
 
-            var albumsFromSpotify = await spotifyClient.PaginateAll(await spotifyClient.Library.GetAlbums().ConfigureAwait(false), paginator);
+            IList<SavedAlbum> albumsFromSpotify = await spotifyClient.PaginateAll(await spotifyClient.Library.GetAlbums().ConfigureAwait(false), paginator);
 
-            var savableAlbums = albumsFromSpotify.Select(a =>
+            SavableAlbum[] savableAlbums = albumsFromSpotify.Select(a =>
                 new SavableAlbum { Artist = a.Album.Artists.FirstOrDefault()?.Name, Album = a.Album.Name, Id = a.Album.Id }).ToArray();
 
             File.WriteAllText(Constants.AlbumListFileName, JsonConvert.SerializeObject(savableAlbums));

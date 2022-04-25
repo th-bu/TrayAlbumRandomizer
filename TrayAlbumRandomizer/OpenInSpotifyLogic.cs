@@ -45,20 +45,20 @@
                 return this.Albums[this.random.Next(this.Albums.Length)].Id;
             }
 
-            if (this.Albums.Length > 0)
+            if (this.Albums.Length <= 0)
             {
-                if (this.shuffledAlbums.Count == 0)
-                {
-                    this.ShuffleAlbums();
-                }
-
-                string albumId = this.shuffledAlbums[0].Id;
-                this.shuffledAlbums.RemoveAt(0);
-
-                return albumId;
+                return string.Empty;
             }
 
-            return string.Empty;
+            if (this.shuffledAlbums.Count == 0)
+            {
+                this.ShuffleAlbums();
+            }
+
+            string albumId = this.shuffledAlbums[0].Id;
+            this.shuffledAlbums.RemoveAt(0);
+
+            return albumId;
         }
     }
 }
